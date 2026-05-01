@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fichador Veterinaria Aurora</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: white; border-radius: 16px; padding: 2rem; width: 90%; max-width: 380px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    h1 { font-size: 20px; font-weight: 600; text-align: center; color: #1a1a1a; margin-bottom: 4px; }
+    .sub { text-align: center; font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+    .clock { text-align: center; font-size: 36px; font-weight: 600; color: #1a1a1a; }
+    .date { text-align: center; font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+    .label { font-size: 13px; color: #666; margin-bottom: 8px; }
+    .vets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; }
+    .vet-btn { padding: 12px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 10px; background: #fafafa; cursor: pointer; }
+    .vet-btn.selected { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; font-weight: 600; }
+    textarea { width: 100%; padding: 10px 12px; font-size: 14px; border: 1.5px solid #ddd; border-radius: 10px; resize: none; font-family: Arial, sans-serif; margin-bottom: 1.5rem; color: #1a1a1a; }
+    textarea:focus { outline: none; border-color: #1D9E75; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn { padding: 14px; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; color: white; }
+    .btn-enter { background: #1D9E75; }
+    .btn-exit { background: #D85A30; }
+    .toast { margin-top: 1rem; padding: 12px; border-radius: 10px; text-align: center; font-size: 14px; font-weight: 500; display: none; }
+    .toast.ok { background: #E1F5EE; color: #0F6E56; display: block; }
+    .toast.err { background: #FAECE7; color: #993C1D; display: block; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Veterinaria Aurora</h1>
+  <p class="sub">Registrá tu entrada o salida</p>
+  <div class="clock" id="clock">--:--</div>
+  <div class="date" id="date">--</div>
+  <p class="label">¿Quién sos?</p>
+  <div class="vets">
+    <button class="vet-btn" onclick="sel(this,'Leonardo Sabene')">Leonardo</button>
+    <button class="vet-btn" onclick="sel(this,'Natalia Kutereba')">Natalia</button>
+    <button class="vet-btn" onclick="sel(this,'Sol Puente')">Sol</button>
+    <button class="vet-btn" onclick="sel(this,'Diego Santana')">Diego</button>
+  </div>
+  <p class="label">Observaciones (opcional)</p>
+  <textarea id="obs" rows="3" placeholder="Ej: llegué tarde por tráfico, salgo antes por turno médico..."></textarea>
+  <div class="actions">
+    <button class="btn btn-enter" onclick="fichar('Entrada')">Entrar</button>
+    <button class="btn btn-exit" onclick="fichar('Salida')">Salir</button>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+  let vet = null;
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhJTiJSy9jQ8sK-LObwEt31KKtulfEvvup5hGVIZ7_BsE_7Em5b0xVwKAyTFxCxywq/exec';
+
+  function sel(el, nombre) {
+    document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    vet = nombre;
+  }
+  function fichar(tipo) {
+    if (!vet) { showToast('Seleccioná tu nombre primero', 'err'); return; }
+    const obs = document.getElementById('obs').value.trim();
+    showToast('Registrando...', 'ok');
+    fetch(SCRIPT_URL + '?vet=' + encodeURIComponent(vet) + '&tipo=' + encodeURIComponent(tipo) + '&obs=' + encodeURIComponent(obs))
+      .then(r => r.json())
+      .then(r => { showToast('✓ ' + tipo + ' registrada — ' + r.hora, 'ok'); document.getElementById('obs').value = ''; vet = null; document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected')); })
+      .catch(() => showToast('Error al registrar, intentá de nuevo', 'err'));
+  }
+  function showToast(msg, cls) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + cls;
+  }
+  function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    document.getElementById('date').textContent = dias[n.getDay()] + ', ' + n.getDate() + ' de ' + meses[n.getMonth()];
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>
