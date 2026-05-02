@@ -50,27 +50,37 @@
 </div>
 <script>
   let vet = null;
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhJTiJSy9jQ8sK-LObwEt31KKtulfEvvup5hGVIZ7_BsE_7Em5b0xVwKAyTFxCxywq/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvgP5mfKMnztGMmdPWGaz1GggBFQRYux_DuxaITbJNW2N3SSkSh2Bjd5UAh84NkKc/exec';
 
   function sel(el, nombre) {
     document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     vet = nombre;
   }
+
   function fichar(tipo) {
     if (!vet) { showToast('Seleccioná tu nombre primero', 'err'); return; }
     const obs = document.getElementById('obs').value.trim();
     showToast('Registrando...', 'ok');
-    fetch(SCRIPT_URL + '?vet=' + encodeURIComponent(vet) + '&tipo=' + encodeURIComponent(tipo) + '&obs=' + encodeURIComponent(obs))
+    const url = SCRIPT_URL + '?vet=' + encodeURIComponent(vet) + '&tipo=' + encodeURIComponent(tipo) + '&obs=' + encodeURIComponent(obs);
+    const proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
+    fetch(proxy)
       .then(r => r.json())
-      .then(r => { showToast('✓ ' + tipo + ' registrada — ' + r.hora, 'ok'); document.getElementById('obs').value = ''; vet = null; document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected')); })
+      .then(r => {
+        showToast('✓ ' + tipo + ' registrada — ' + r.hora, 'ok');
+        document.getElementById('obs').value = '';
+        vet = null;
+        document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
+      })
       .catch(() => showToast('Error al registrar, intentá de nuevo', 'err'));
   }
+
   function showToast(msg, cls) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'toast ' + cls;
   }
+
   function tick() {
     const n = new Date();
     document.getElementById('clock').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
