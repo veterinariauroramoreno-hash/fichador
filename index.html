@@ -63,11 +63,11 @@
     const obs = document.getElementById('obs').value.trim();
     showToast('Registrando...', 'ok');
     const url = SCRIPT_URL + '?vet=' + encodeURIComponent(vet) + '&tipo=' + encodeURIComponent(tipo) + '&obs=' + encodeURIComponent(obs);
-    const proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
-    fetch(proxy)
+    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
       .then(r => r.json())
       .then(r => {
-        showToast('✓ ' + tipo + ' registrada — ' + r.hora, 'ok');
+        const data = JSON.parse(r.contents);
+        showToast('✓ ' + tipo + ' registrada — ' + data.hora, 'ok');
         document.getElementById('obs').value = '';
         vet = null;
         document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
