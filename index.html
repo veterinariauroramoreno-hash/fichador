@@ -50,7 +50,7 @@
 </div>
 <script>
   let vet = null;
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvgP5mfKMnztGMmdPWGaz1GggBFQRYux_DuxaITbJNW2N3SSkSh2Bjd5UAh84NkKc/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvgP5mfKMnztGMmdPWGaz1GggBFQRYux_DuxalTbJNW2N3SSkSh2Bjd5UAh84NkKc/exec';
 
   function sel(el, nombre) {
     document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
@@ -61,13 +61,11 @@
   function fichar(tipo) {
     if (!vet) { showToast('Seleccioná tu nombre primero', 'err'); return; }
     const obs = document.getElementById('obs').value.trim();
-    showToast('Registrando...', 'ok');
     const url = SCRIPT_URL + '?vet=' + encodeURIComponent(vet) + '&tipo=' + encodeURIComponent(tipo) + '&obs=' + encodeURIComponent(obs);
-    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
-      .then(r => r.json())
-      .then(r => {
-        const data = JSON.parse(r.contents);
-        showToast('✓ ' + tipo + ' registrada — ' + data.hora, 'ok');
+    showToast('Registrando...', 'ok');
+    fetch(url, {mode: 'no-cors'})
+      .then(() => {
+        showToast('✓ ' + tipo + ' registrada!', 'ok');
         document.getElementById('obs').value = '';
         vet = null;
         document.querySelectorAll('.vet-btn').forEach(b => b.classList.remove('selected'));
